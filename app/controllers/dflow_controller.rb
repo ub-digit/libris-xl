@@ -233,10 +233,10 @@ class DflowController < ApplicationController
 
   def create_issuance_type(record)
     # Get the instanceOf object from the record. It can be founde in the graph array inside an object with the attribute @type = Instance
-    instance_of = record["@graph"].find { |obj| obj["@type"] == "Instance" }["issuanceType"]
+    issuance_type = record["@graph"].find { |obj| obj["@type"] == "Instance" }["issuanceType"]
 
     # Return the issuanceType from the instanceOf object
-    instance_of
+    issuance_type
   end
 
   def create_has_title(record)
