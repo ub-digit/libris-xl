@@ -1,5 +1,5 @@
 class DflowController < ApplicationController
-  # call validate_key_access before the receive action
+  # call validate_key_access before the create action
   before_action only: [:create] do
     validate_key_access("DFLOW")
   end
@@ -46,7 +46,7 @@ class DflowController < ApplicationController
     # For testing and debugging
     dry_run = params[:test] || false
 
-    original_record = Librisxl.get_record(libris_id)
+    original_record = LibrisxlApi.get_record(libris_id)
 #    pp original_record
 
     # Create reproductionOf object
@@ -75,7 +75,7 @@ class DflowController < ApplicationController
     electronic_record = create_electronic_record(reproduction_of, bibliography, issuanceType, has_title, instance_of, associated_media, production)
     pp electronic_record
 
-    token = Librisxl.get_token
+    token = LibrisxlApi.get_token
     if !token
       render status: :internal_server_error, json: {error: {msg: "Failed to get token"}}
       return
@@ -85,7 +85,7 @@ class DflowController < ApplicationController
     if dry_run
       electronic_record_id = "test_electronic_id"
     else
-      electronic_record_id = Librisxl.write_record(token, electronic_record)
+      electronic_record_id = LibrisxlApi.write_record(token, electronic_record)
       if !electronic_record_id
         render status: :internal_server_error, json: {error: {msg: "Failed to write record"}}
         return
@@ -103,7 +103,7 @@ class DflowController < ApplicationController
     if dry_run
       holding_record_id = "test_holding_id"
     else
-      holding_record_id = Librisxl.write_record(token, holding_record)
+      holding_record_id = LibrisxlApi.write_record(token, holding_record)
       if !holding_record_id
         render status: :internal_server_error, json: {error: {msg: "Failed to write holding"}}
         return

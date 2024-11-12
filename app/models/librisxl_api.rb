@@ -1,4 +1,4 @@
-class Librisxl
+class LibrisxlApi
   require 'pp'
   # Must be included here to work in production
   require 'rest-client'
