@@ -1,5 +1,7 @@
 class Librisxl
   require 'pp'
+  # Must be included here to work in production
+  require 'rest-client'
 
   def self.get_token
     token_url = ENV['LIBRIS_TOKEN_URL']
