@@ -40,3 +40,6 @@
 # Ignore Docker-related files
 /.dockerignore
 /Dockerfile*
+/.env.sample
+/.env
+/docker-compose.yml
