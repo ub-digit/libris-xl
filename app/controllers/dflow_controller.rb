@@ -9,6 +9,9 @@ class DflowController < ApplicationController
     # Remove all keys in params with empty values
     params[:record].delete_if { |k, v| v.blank? }
 
+    # Trim all values in params
+    params[:record].transform_values!(&:strip)
+
     if !params[:record]
       render status: :bad_request, json: {error: {msg: "Missing record object as parameter"}}
       return
