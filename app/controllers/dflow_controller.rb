@@ -10,7 +10,6 @@ class DflowController < ApplicationController
       render status: :bad_request, json: {error: {msg: "Missing record object as parameter"}}
       return
     end
-#    pp params
 
     # Following parameters are recieved from the dFlow, and are mandatory
     libris_id = params[:record][:libris_id]
@@ -21,7 +20,12 @@ class DflowController < ApplicationController
       return
     end
 
-    # TBD: Check libris_id number format, if it is not seems to be a libris xl id, we must search for it in libris xl
+    # Get a valid libris xl id from the libris id
+    libris_xl_id = LibrisxlApi.get_libris_xl_id(libris_id)
+    if !libris_xl_id
+      render status: :bad_request, json: {error: {msg: "Failed to get Libris XL id"}}
+      return
+    end
 
     # Following parameters are not mandatory, if not present they will be added from environment variables
     # type
@@ -46,11 +50,14 @@ class DflowController < ApplicationController
     # For testing and debugging
     dry_run = params[:test] || false
 
-    original_record = LibrisxlApi.get_record(libris_id)
-#    pp original_record
+    original_record = LibrisxlApi.get_record(libris_xl_id)
+    if !original_record
+      render status: :internal_server_error, json: {error: {msg: "Failed to get record"}}
+      return
+    end
 
     # Create reproductionOf object
-    reproduction_of = create_reproduction_of(libris_id)
+    reproduction_of = create_reproduction_of(libris_xl_id)
     # Get bibliographic codes from the record and store them in an array
     bibliographic_codes = [bibliographic_code, additional_bibliographic_code].compact.reject(&:empty?)
     # Create bibligraphy object
@@ -73,7 +80,6 @@ class DflowController < ApplicationController
 
     # Create electronic record object
     electronic_record = create_electronic_record(reproduction_of, bibliography, issuanceType, has_title, instance_of, associated_media, production)
-    pp electronic_record
 
     token = LibrisxlApi.get_token
     if !token
@@ -97,7 +103,6 @@ class DflowController < ApplicationController
 
     # Create holding object
     holding_record = create_holding_record(electronic_record_id, has_component)
-    pp holding_record
 
     # Write the holding to Libris XL
     if dry_run
