@@ -151,12 +151,6 @@ class DflowController < ApplicationController
           "descriptionLanguage": {
             "@id": "https://id.kb.se/language/swe"
           },
-          "digitalCharacteristic": [
-            {
-              "@type": "EncodingFormat",
-              "label": ""
-            }
-          ],
           "encodingLevel": "marc:MinimalLevel",
           "bibliography": bibliography
         },
@@ -195,23 +189,32 @@ class DflowController < ApplicationController
   end
 
   def create_associated_media(url, publicnote, remark)
-    # create associatedMedia object
-    [
+    # create associated_media array with base object
+    associated_media = [
       {
         "@type": "MediaObject",
-        "marc:publicNote": [
-          publicnote
-        ],
-        "cataloguersNote": [
-          remark
-        ],
-        "publisher": [],
         "uri": [
           url
-        ],
-        "usageAndAccessPolicy": []
+        ]
       }
     ]
+
+    # If publicnote is present, add it to the associated_media object
+    if publicnote.present?
+      associated_media[0]["marc:publicNote"] = [
+        publicnote
+      ]
+    end
+
+    # If remark is present, add it to the associated_media object
+    if remark.present?
+      associated_media[0]["cataloguersNote"] = [
+        remark
+      ]
+    end
+
+    # Return the associated_media object
+    associated_media
   end
 
   def create_production(place, agent, type)
