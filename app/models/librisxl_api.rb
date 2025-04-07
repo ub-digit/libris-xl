@@ -65,6 +65,7 @@ class LibrisxlApi
     begin
       response = RestClient.post libris_api_base_url, data.to_json, header
     rescue RestClient::ExceptionWithResponse => e
+      Rails.logger.error "Error writing record to Libris XL: #{e.message}"
       response = e.response
     end
     # If response status is 201, return the new record id thar can be found in the Location header
