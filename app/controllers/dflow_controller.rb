@@ -175,7 +175,7 @@ class DflowController < ApplicationController
 
   def create_reproduction_of(id)
     {
-      "@id": "https://libris-stg.kb.se/#{id}#it"
+      "@id": "#{ENV['LIBRIS_API_BASE_URL']}/#{id}#it"
     }
   end
 
@@ -183,7 +183,7 @@ class DflowController < ApplicationController
     # Loop through the codes and create a bibliography object for each code, then return them in an array
     codes.map do |code|
       {
-        "@id": "https://libris.kb.se/library/#{code}"#,
+        "@id": "#{ENV['LIBRIS_API_BASE_URL']}/library/#{code}"#,
       }
     end
   end
@@ -277,7 +277,7 @@ class DflowController < ApplicationController
       {
         "@type": "Item",
         "heldBy": {
-          "@id": "https://libris.kb.se/library/#{ENV['SIGEL']}"
+          "@id": "#{ENV['LIBRIS_API_BASE_URL']}/library/#{ENV['SIGEL']}"
         }
       }
     ]
@@ -319,10 +319,10 @@ class DflowController < ApplicationController
           "@id": "https://id.kb.se/TEMPID#it",
           "@type": "Item",
           "heldBy": {
-            "@id": "https://libris.kb.se/library/#{ENV['SIGEL']}"
+            "@id": "#{ENV['LIBRIS_API_BASE_URL']}/library/#{ENV['SIGEL']}"
           },
           "itemOf": {
-            "@id": "https://libris-stg.kb.se/#{id}#it"
+            "@id": "#{ENV['LIBRIS_API_BASE_URL']}/#{id}#it"
           },
           "hasComponent": has_component
         }
