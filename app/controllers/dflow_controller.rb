@@ -62,27 +62,34 @@ class DflowController < ApplicationController
       return
     end
 
-    # Create reproductionOf object
-    reproduction_of = create_reproduction_of(libris_xl_id)
-    # Get bibliographic codes from the record and store them in an array
-    bibliographic_codes = [bibliographic_code, additional_bibliographic_code].compact.reject(&:empty?)
-    # Create bibligraphy object
-    bibliography = create_bibliography(bibliographic_codes)
+    begin
+      # Create reproductionOf object
+      reproduction_of = create_reproduction_of(libris_xl_id)
+      # Get bibliographic codes from the record and store them in an array
+      bibliographic_codes = [bibliographic_code, additional_bibliographic_code].compact.reject(&:empty?)
+      # Create bibligraphy object
+      bibliography = create_bibliography(bibliographic_codes)
 
-    # Get issuanceType from the record
-    issuanceType = create_issuance_type(original_record)
+      # Get issuanceType from the record
+      issuanceType = create_issuance_type(original_record)
 
-    # Create hasTitle object
-    has_title = create_has_title(original_record)
+      # Create hasTitle object
+      has_title = create_has_title(original_record)
 
-    # Create instanceOf object
-    instance_of = create_instance_of(original_record)
+      # Create instanceOf object
+      instance_of = create_instance_of(original_record)
 
-    # Create associatedMedia object
-    associated_media = create_associated_media(url, publicnote, remark)
+      # Create associatedMedia object
+      associated_media = create_associated_media(url, publicnote, remark)
 
-    # create production object
-    production = create_production(place, agent, type)
+      # create production object
+      production = create_production(place, agent, type)
+    # If there is a raise error, return a 400 bad request
+    rescue => e
+      render status: :bad_request, json: {error: {msg: "Error in creating data from the libris record #{libris_id}: #{e.message}"}}
+      return
+    end
+
 
     # Create electronic record object
     electronic_record = create_electronic_record(reproduction_of, bibliography, issuanceType, has_title, instance_of, associated_media, production)
@@ -245,29 +252,30 @@ class DflowController < ApplicationController
 
   end
 
-  def create_issuance_type(record)
-    # Get the instanceOf object from the record. It can be founde in the graph array inside an object with the attribute @type = Instance
-    issuance_type = record["@graph"].find { |obj| obj["@type"] == "Instance" }["issuanceType"]
+  def get_instance_data(record)
+    # Get the instance data in the record. It can be founde in the graph array inside an object with the attribute @type = Instance, or if that does not exist, try to find @type = Print
+    # See https://id.kb.se/vocab/Instance for more possible values
+    instance_data = record["@graph"].find { |obj| obj["@type"] == "Instance" } || record["@graph"].find { |obj| obj["@type"] == "Print" }
+    if instance_data.nil?
+      raise "No instance data found in the record"
+    end
+    instance_data
+  end
 
-    # Return the issuanceType from the instanceOf object
-    issuance_type
+  def create_issuance_type(record)
+    # Get the issuanceType from the record.
+    get_instance_data(record)["issuanceType"]
   end
 
   def create_has_title(record)
-    # Get the hasTitle array from the record. It can be founde in the graph array inside an object with the attribute @type = Instance
-    has_title = record["@graph"].find { |obj| obj["@type"] == "Instance" }["hasTitle"]
-
-    # Return the hasTitle array
-    has_title
+    # Get the hasTitle array from the record.
+    get_instance_data(record)["hasTitle"]
 
   end
 
   def create_instance_of(record)
-    # Get the instanceOf object from the record. It can be founde in the graph array inside an object with the attribute @type = Instance
-    instance_of = record["@graph"].find { |obj| obj["@type"] == "Instance" }["instanceOf"]
-
-    # return the instanceOf object
-    instance_of
+    # Get the instanceOf object from the record.
+    get_instance_data(record)["instanceOf"]
   end
 
 
