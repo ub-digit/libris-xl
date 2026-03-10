@@ -253,9 +253,9 @@ class DflowController < ApplicationController
   end
 
   def get_instance_data(record)
-    # Get the instance data in the record. It can be founde in the graph array inside an object with the attribute @type = Instance, or if that does not exist, try to find @type = Print
+    # Get the instance data in the record. It can be founde in the graph array inside an object with the attribute @type = PhysicalResource
     # See https://id.kb.se/vocab/Instance for more possible values
-    instance_data = record["@graph"].find { |obj| obj["@type"] == "Instance" } || record["@graph"].find { |obj| obj["@type"] == "Print" }
+    instance_data = record["@graph"].find { |obj| obj["@type"] == "PhysicalResource" }
     if instance_data.nil?
       raise "No instance data found in the record"
     end
